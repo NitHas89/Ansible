@@ -1,15 +1,15 @@
 - name: configuring repository AppStream
   yum_repository:
-    name: controlrepo_AppStream
-    description: controlrepo_AppStream
-    file: controlrepo_AppStream
+    name: control_repo_AppStream
+    description: control_repo_AppStream
+    file: control_repo_AppStream
     baseurl: http://control/AppStream
     gpgcheck:  no
 - name: configuring repository BaseOS
   yum_repository:
-    name: controlrepo_Base
-    description: controlrepo_Base
-    file: controlrepo_Base
+    name: control_repo_Base
+    description: control_repo_Base
+    file: control_repo_Base
     baseurl: http://control/BaseOS
     gpgcheck: no 
 
