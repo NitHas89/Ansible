@@ -1,0 +1,55 @@
+- name: create a local user
+  user:
+    name: "{{username}}"
+    password: "{{password}}"
+    generate_ssh_key: yes
+- name: install httpd and policycoreutils-python
+  yum:
+    name: 
+      - httpd
+      - python3
+      - policycoreutils-python-utils 
+    state: present
+- name: include name in file hosts
+  lineinfile:
+    line: "{{item.managed_hostip}}  {{item.managed_hostname}}"
+    path: /etc/hosts
+    state: present
+  loop: "{{managed_servers}}"           
+- name: grant sudo privilege
+  copy:
+    content: "{{username}} ALL=(ALL) NOPASSWD:ALL"
+    dest: /etc/sudoers.d/ansible    
+- name: create a dir for storing sshkeys
+  file:
+    path: sshkeys/{{username}}
+    state: directory    
+- name: copy .ssh keys for user ansible to sshkeys dir
+  shell: "cat /home/{{username}}/.ssh/id_rsa.pub >  ./sshkeys/{{username}}/id_rsa.pub "
+- name: modify configuration of web server
+  lineinfile:
+    path: /etc/httpd/conf/httpd.conf 
+    regexp: '^DocumentRoot "/var/www/html'
+    line: 'DocumentRoot "/iso"'
+    state: present
+- name: modify configuration
+  lineinfile:
+    path: /etc/httpd/conf/httpd.conf
+    regexp: '^<Directory "/var/www/html">'
+    line: '<Directory "/iso">'
+    state: present
+- name: modify fcontexttype
+  sefcontext:
+    target: '/iso(/.*)?'
+    setype: httpd_sys_content_t
+    state: present
+- name: restart web server
+  service:
+    name: httpd
+    state: restarted
+- name: Enable httpd service to firewall configuration
+  firewalld:
+    service: http
+    state: enabled
+    permanent: yes
+    immediate: yes
