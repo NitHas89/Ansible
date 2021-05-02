@@ -33,7 +33,9 @@
         line: "{{ item.managed_hostip }}  {{ item.managed_hostname }}"
         path: /etc/hosts
         state: present
-      loop: "{{ managed_servers }}"     
+      loop: "{{ managed_servers }}" 
+    - name: setting up webserver for repos
+      include_tasks: tasks/setup_webserver_localhost.yml
   tags: setup_localhost
 
 - name: setup ansible managed hosts
@@ -51,6 +53,4 @@
         key: "{{ lookup('file', './sshkeys/' + username + '/id_rsa.pub') }
     - name: create repo1
       include_tasks: tasks/createrepo.yml
-  #  - name: create ansible user
-   #   include_tasks: tasks/setup_managedhost.yml 
-         
+ 
