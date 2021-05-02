@@ -1,0 +1,56 @@
+---
+- name: setup localhost
+  hosts: localhost
+  vars_files:
+    - vars/secret.yml
+  vars:
+    managed_servers:
+      - managed_hostname: server1
+        managed_hostip: 192.168.122.123
+      - managed_hostname: server2
+        managed_hostip: 192.168.122.124  
+  tasks:
+    - name: creating iso directory for mounting cdrom
+      file:
+        path: /iso
+        state: directory       
+    - name: mounting iso file
+      mount:
+        path: /iso
+        src: /dev/sr0
+        fstype: iso9660
+        state: mounted
+    - name: setting user {{ username }}account
+      include_tasks: tasks/setup_useraccount_ansible.yml
+    - name: create a dir for storing sshkeys
+      file:
+        path: sshkeys/{{ username }}
+        state: directory    
+    - name: copy .ssh keys for user {{ username }} to sshkeys dir
+      shell: "cat /home/{{ username }}/.ssh/id_rsa.pub >  ./sshkeys/{{ username }}/id_rsa.pub "
+    - name: include name in file hosts
+      lineinfile:
+        line: "{{ item.managed_hostip }}  {{ item.managed_hostname }}"
+        path: /etc/hosts
+        state: present
+      loop: "{{ managed_servers }}" 
+    - name: setting up webserver for repos
+      include_tasks: tasks/setup_webserver_localhost.yml
+  tags: setup_localhost
+
+- name: setup ansible managed hosts
+  hosts: all
+  remote_user: root
+  become: no
+  vars_files:
+    - vars/secret.yml      
+  tasks:
+    - name: setup {{ username }} and sudo configurtion for user
+      include_tasks: tasks/setup_useraccount_ansible.yml
+    - name: copy the ssh_key
+      authorized_key:
+        user: "{{ username }}"
+        key: "{{ lookup('file', './sshkeys/' + username + '/id_rsa.pub') }
+    - name: create repo1
+      include_tasks: tasks/createrepo.yml
+ 
