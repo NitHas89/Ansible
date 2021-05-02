@@ -50,7 +50,7 @@
     - name: copy the ssh_key
       authorized_key:
         user: "{{ username }}"
-        key: "{{ lookup('file', './sshkeys/' + username + '/id_rsa.pub') }
+        key: "{{ lookup('file', './sshkeys/' + username + '/id_rsa.pub') }}"
     - name: create repo1
       include_tasks: tasks/createrepo.yml
  
