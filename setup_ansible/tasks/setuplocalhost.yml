@@ -3,7 +3,7 @@
     name: "{{username}}"
     password: "{{password}}"
     generate_ssh_key: yes
-- name: install httpd and policycoreutils-python
+- name: install required packages 
   yum:
     name: 
       - httpd
@@ -12,24 +12,24 @@
     state: present
 - name: include name in file hosts
   lineinfile:
-    line: "{{item.managed_hostip}}  {{item.managed_hostname}}"
+    line: "{{ item.managed_hostip }}  {{ item.managed_hostname }}"
     path: /etc/hosts
     state: present
-  loop: "{{managed_servers}}"           
+  loop: "{{ managed_servers }}"           
 - name: grant sudo privilege
   copy:
     content: "{{username}} ALL=(ALL) NOPASSWD:ALL"
-    dest: /etc/sudoers.d/ansible    
+    dest: /etc/sudoers.d/{{ username }}    
 - name: create a dir for storing sshkeys
   file:
-    path: sshkeys/{{username}}
+    path: sshkeys/{{ username }}
     state: directory    
-- name: copy .ssh keys for user ansible to sshkeys dir
-  shell: "cat /home/{{username}}/.ssh/id_rsa.pub >  ./sshkeys/{{username}}/id_rsa.pub "
+- name: copy .ssh keys for user {{ username }} to sshkeys dir
+  shell: "cat /home/{{ username }}/.ssh/id_rsa.pub >  ./sshkeys/{{ username }}/id_rsa.pub "
 - name: modify configuration of web server
   lineinfile:
     path: /etc/httpd/conf/httpd.conf 
-    regexp: '^DocumentRoot "/var/www/html'
+    regexp: '^DocumentRoot "/var/www/html"'
     line: 'DocumentRoot "/iso"'
     state: present
 - name: modify configuration
