@@ -1,14 +1,27 @@
 ---
 - name: setup localhost
   hosts: localhost
+  become: yes
+  become_user: root
+  become_method: sudo
+  remote_user: ansible
   vars_files:
     - vars/secret.yml
-    - vars/managed_server 
+    - vars/managed_server
+    
   tasks:
     - name: creating iso directory for mounting cdrom
       file:
         path: /iso
-        state: directory       
+        state: directory
+    - name: create inventory file
+      template:
+        src: templates/inventory.j2
+        dest: ./inventory  
+    - name: creating ansible config file
+      template:
+        src: templates/ansible.cfg.j2
+        dest: ./ansible.cfg
     - name: mounting iso file
       mount:
         path: /iso

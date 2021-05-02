@@ -1,4 +1,13 @@
-
+- name: creating iso directory for mounting cdrom
+  file:
+    path: /iso
+    state: directory
+- name: mounting iso file
+  mount:
+    path: /iso
+    src: /dev/sr0
+    fstype: iso9660
+    state: mounted
 - name: install required packages 
   yum:
     name: 
@@ -33,15 +42,5 @@
     state: enabled
     permanent: yes
     immediate: yes
-- name: creating iso directory for mounting cdrom
-    file:
-      path: /iso
-      state: directory
-- name: mounting iso file
-    mount:
-      path: /iso
-      src: /dev/sr0
-      fstype: iso9660
-      state: mounted
 
 

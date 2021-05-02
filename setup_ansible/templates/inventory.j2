@@ -1,0 +1,10 @@
+
+{% for host in managed_servers %}
+{{ host.managed_hostname }}
+{% endfor %}
+
+[webserver]
+{{ managed_servers[0].managed_hostname }}
+
+[dbserver]
+{{ managed_servers[1].managed_hostname }}
