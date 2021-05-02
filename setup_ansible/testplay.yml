@@ -10,33 +10,6 @@
       - managed_hostname: server2
         managed_hostip: 192.168.122.124  
   tasks:
-    - name: creating iso directory for mounting cdrom
-      file:
-        path: /iso
-        state: directory       
-    - name: mounting iso file
-      mount:
-        path: /iso
-        src: /dev/sr0
-        fstype: iso9660
-        state: mounted
-
-  #  - name: configuring yum repositories
-  #    yum_repository:
-  #      name: BaseOS
-  #      description: BaseOS repo
-  #      file: BaseOS 
-  #      baseurl: file:///iso/BaseOS
-  #      enabled: yes
-  #      gpgcheck: no      
-  #  - name: configuring yum repositories
-  #    yum_repository:
-  #      name: AppStream
-  #      description: AppStream repo
-  #      file: AppStream
-  #      baseurl: file:///iso/AppStream
-  #      enabled: yes
-  #      gpgcheck: no 
     - name: setting localhost
       include_tasks: tasks/setuplocalhost.yml     
   tags: setup_localhost
@@ -52,4 +25,4 @@
       include_tasks: tasks/createrepo.yml
     - name: create ansible user
       include_tasks: tasks/setup_managedhost.yml 
-         
+  tags: setup_managedhost       
