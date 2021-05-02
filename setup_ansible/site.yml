@@ -3,12 +3,7 @@
   hosts: localhost
   vars_files:
     - vars/secret.yml
-  vars:
-    managed_servers:
-      - managed_hostname: server1
-        managed_hostip: 192.168.122.123
-      - managed_hostname: server2
-        managed_hostip: 192.168.122.124  
+    - vars/managed_server 
   tasks:
     - name: creating iso directory for mounting cdrom
       file:
