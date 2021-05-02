@@ -20,25 +20,20 @@
         src: /dev/sr0
         fstype: iso9660
         state: mounted
-
-  #  - name: configuring yum repositories
-  #    yum_repository:
-  #      name: BaseOS
-  #      description: BaseOS repo
-  #      file: BaseOS 
-  #      baseurl: file:///iso/BaseOS
-  #      enabled: yes
-  #      gpgcheck: no      
-  #  - name: configuring yum repositories
-  #    yum_repository:
-  #      name: AppStream
-  #      description: AppStream repo
-  #      file: AppStream
-  #      baseurl: file:///iso/AppStream
-  #      enabled: yes
-  #      gpgcheck: no 
-    - name: setting localhost
-      include_tasks: tasks/setuplocalhost.yml     
+    - name: setting user {{ username }}account
+      include_tasks: tasks/setup_useraccount_ansible.yml
+    - name: create a dir for storing sshkeys
+      file:
+        path: sshkeys/{{ username }}
+        state: directory    
+    - name: copy .ssh keys for user {{ username }} to sshkeys dir
+      shell: "cat /home/{{ username }}/.ssh/id_rsa.pub >  ./sshkeys/{{ username }}/id_rsa.pub "
+    - name: include name in file hosts
+      lineinfile:
+        line: "{{ item.managed_hostip }}  {{ item.managed_hostname }}"
+        path: /etc/hosts
+        state: present
+      loop: "{{ managed_servers }}"     
   tags: setup_localhost
 
 - name: setup ansible managed hosts
@@ -48,8 +43,14 @@
   vars_files:
     - vars/secret.yml      
   tasks:
+    - name: setup {{ username }} and sudo configurtion for user
+      include_tasks: tasks/setup_useraccount_ansible.yml
+    - name: copy the ssh_key
+      authorized_key:
+        user: "{{ username }}"
+        key: "{{ lookup('file', './sshkeys/' + username + '/id_rsa.pub') }
     - name: create repo1
       include_tasks: tasks/createrepo.yml
-    - name: create ansible user
-      include_tasks: tasks/setup_managedhost.yml 
+  #  - name: create ansible user
+   #   include_tasks: tasks/setup_managedhost.yml 
          
