@@ -1,6 +1,0 @@
-
-- name: copy the ssh_key
-  authorized_key:
-    user: "{{username}}"
-    key: "{{ lookup('file', './sshkeys/' + username + '/id_rsa.pub') }}"
-   
