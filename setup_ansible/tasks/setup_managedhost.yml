@@ -1,13 +1,7 @@
 - name: creating user ansible
-  user:
-    name: "{{username}}"
-    password: "{{password}}"
+  include_task: setup_useraccount_ansible.yml
 - name: copy the ssh_key
   authorized_key:
     user: "{{username}}"
     key: "{{ lookup('file', './sshkeys/' + username + '/id_rsa.pub') }}"
-
-- name: create sudoers for ansible
-  copy:
-    content: "{{username}} ALL=(ALL)  NOPASSWD:ALL"
-    dest: /etc/sudoers.d/{{username}}    
+   
