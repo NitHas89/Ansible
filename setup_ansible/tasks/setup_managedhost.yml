@@ -1,5 +1,4 @@
-- name: creating user ansible
-  include_task: setup_useraccount_ansible.yml
+
 - name: copy the ssh_key
   authorized_key:
     user: "{{username}}"
