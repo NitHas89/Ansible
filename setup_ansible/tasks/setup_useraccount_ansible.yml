@@ -1,0 +1,15 @@
+- name: create a local user
+  user:
+    name: "{{username}}"
+    password: "{{password}}"
+    generate_ssh_key: yes
+- name: grant sudo privilege
+  copy:
+    content: "{{username}} ALL=(ALL) NOPASSWD:ALL"
+    dest: /etc/sudoers.d/{{ username }}
+- name: create a dir for storing sshkeys
+  file:
+    path: sshkeys/{{ username }}
+    state: directory
+- name: copy .ssh keys for user {{ username }} to sshkeys dir
+  shell: "cat /home/{{ username }}/.ssh/id_rsa.pub >  ./sshkeys/{{ username }}/id_rsa.pub "
