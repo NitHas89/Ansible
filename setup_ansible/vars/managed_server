@@ -1,0 +1,5 @@
+   managed_servers:
+      - managed_hostname: server1
+        managed_hostip: 192.168.122.123
+      - managed_hostname: server2
+        managed_hostip: 192.168.122.124

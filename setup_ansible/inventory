@@ -1,0 +1,9 @@
+
+server1
+server2
+
+[webserver]
+server1
+
+[dbserver]
+server2

@@ -1,0 +1,9 @@
+- name: create a local user
+  user:
+    name: "{{username}}"
+    password: "{{password}}"
+    generate_ssh_key: yes
+- name: grant sudo privilege
+  copy:
+    content: "{{username}} ALL=(ALL) NOPASSWD:ALL"
+    dest: /etc/sudoers.d/{{ username }}

@@ -1,0 +1,46 @@
+- name: creating iso directory for mounting cdrom
+  file:
+    path: /iso
+    state: directory
+- name: mounting iso file
+  mount:
+    path: /iso
+    src: /dev/sr0
+    fstype: iso9660
+    state: mounted
+- name: install required packages 
+  yum:
+    name: 
+      - httpd
+      - python3
+      - policycoreutils-python-utils 
+    state: present          
+- name: modify configuration of web server
+  lineinfile:
+    path: /etc/httpd/conf/httpd.conf 
+    regexp: '^DocumentRoot "/var/www/html"'
+    line: 'DocumentRoot "/iso"'
+    state: present
+- name: modify configuration
+  lineinfile:
+    path: /etc/httpd/conf/httpd.conf
+    regexp: '^<Directory "/var/www/html">'
+    line: '<Directory "/iso">'
+    state: present
+- name: modify fcontexttype
+  sefcontext:
+    target: '/iso(/.*)?'
+    setype: httpd_sys_content_t
+    state: present
+- name: restart web server
+  service:
+    name: httpd
+    state: restarted
+- name: Enable httpd service to firewall configuration
+  firewalld:
+    service: http
+    state: enabled
+    permanent: yes
+    immediate: yes
+
+
