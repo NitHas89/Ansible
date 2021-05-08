@@ -1,0 +1,13 @@
+---
+- name: create hosts file on all server
+  hosts: all
+  tasks:
+    - file:
+        path: /tmp/hosts
+        state: touch
+    - name: create hosts file from
+      template:
+        src: lab8_1.j2
+        dest: /tmp/hosts
+
+

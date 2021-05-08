@@ -1,0 +1,9 @@
+---
+- name: create file using template
+  hosts: server1
+  tasks:
+    - name: create file from template
+      template:
+        src: ex8_3.j2
+        dest: /tmp/file1
+    

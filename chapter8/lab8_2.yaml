@@ -1,0 +1,55 @@
+---
+- name: setup vsftpd 
+  hosts: server1
+  vars_files:
+    - vars/varslab8_2.yaml
+  tasks:
+    - name: in stall required packages
+      yum:
+        name:
+          - vsftpd
+          - policycoreutils-python-utils
+          - firewalld
+        state: present
+    - name: start services
+      service:
+        name: "{{ item }}"
+        state: started
+        enabled: true
+      loop:
+        - vsftpd
+        - firewalld
+    - name: create configuration file
+      template:
+        src: vsftpd.j2
+        dest: /etc/vsftpd/vsftpd.conf
+
+    - name: changing permission on /var/ftp/pub
+      file:
+        path: /var/ftp/pub
+        mode: 0777
+    - name: change the ftpd_anon_write Boolean to allow anonymous user writes
+      seboolean:
+        name: ftpd_anon_write
+        state: yes
+        persistent: yes
+    - name: sefocontext on file
+      sefcontext:
+        target: '/var/ftp/pub(/.*)?'
+        setype:  public_content_rw_t
+        state: present
+    - name: allow service in firewall
+      firewalld:
+        service: ftp
+        permanent: yes
+        immediate: yes
+        state: enabled
+    - name: run restorecon 
+      command: "restorecon -Rv /var/ftp/pub "
+      notify: restart_vsftpd
+  handlers:
+    - name: restart_vsftpd
+      service:
+        name: vsftpd
+        state: restarted
+      
