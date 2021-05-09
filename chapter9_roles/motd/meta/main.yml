@@ -1,6 +1,0 @@
-galaxy_info:  
-  author: student  
-  description: sample motd role  
-  company: mycompany  
-  license: license GPLv2  
-  min_ansible_version: 2.5
