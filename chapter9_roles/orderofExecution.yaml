@@ -1,0 +1,11 @@
+---
+- name: showing order of execution
+  hosts: server1
+  pre_tasks:
+    - debug:
+        msg: "Pretasks"
+  roles:
+    - my_role
+  post_tasks:
+    - debug:
+        msg: "Post-task"

@@ -1,0 +1,8 @@
+---
+- name: create motd file using motd role
+  hosts: all
+  roles:
+    - role: motd
+      system_manager: neha@example.com
+
+    
