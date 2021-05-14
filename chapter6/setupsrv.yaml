@@ -1,0 +1,50 @@
+---
+- name: install and setup services
+  hosts: file
+  vars_files:
+    - vars/allvars
+  tasks:
+    - name:  installing packages  
+      yum:
+        name:
+          - "{{ ansible_facts['ansible_local']['custom']['packages']['ftp_package'] }}"
+          - "{{ ansible_facts['ansible_local']['custom']['packages']['web_package'] }}"
+        state: present
+        
+    - name:
+      service:
+        name: "{{ item }}"
+        enabled: yes
+        state: started
+      loop:
+          - "{{ ansible_facts['ansible_local']['custom']['services']['ftp_service'] }}"
+          - "{{ ansible_facts['ansible_local']['custom']['services']['web_service'] }}"
+    - name: enable service in firewall
+      firewalld:
+        service: "{{ item }}"
+        state: enabled
+        permanent: yes
+        immediate: yes
+      loop:
+        - http
+        - ftp
+    - name: Creating index file for web server
+      copy:
+        content: "Hello World this is chapter6"
+        dest: /var/www/html/index.html
+      notify: restart_http server
+    - name: verifying webserver
+      uri:
+        url: http://server1
+        status_code: 200
+        return_content: yes
+      register: rslt
+    - debug: var=rslt
+  handlers:
+    - name: restart_http server
+      service:
+        name: httpd
+        state: restarted
+        
+
+    

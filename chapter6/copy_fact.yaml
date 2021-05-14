@@ -1,0 +1,16 @@
+---
+- name: Copy custom facts
+  hosts: all
+  vars:
+    remote_dir: /etc/ansible/facts.d
+    fact_file: files/custom.fact
+  tasks:
+    - name: create directories for managed hosts
+      file:
+        path: "{{ remote_dir }}"
+        state: directory
+
+    - name: copy facts file on managed server
+      copy:
+        src: "{{ fact_file }}"
+        dest: "{{ remote_dir }}"
