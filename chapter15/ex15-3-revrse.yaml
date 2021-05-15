@@ -1,0 +1,47 @@
+---
+- name: ex15-3 storage solution
+  hosts: all
+  gather_facts: yes
+  tasks:
+    - name: run tasks only on hosts that have vdb defined
+      block:
+        - fail:
+            msg: "Cant find device vdb"
+          when: ansible_facts['devices']['vdb'] is not defined
+        - name: print message
+          debug:
+            msg: found vdb device on {{ ansible_facts['hostname'] }}
+        - name: unmount device
+          mount:
+            path: /files
+            src: /dev/vgfiles/lvfiles
+            fstype: xfs
+            state: absent
+        - name: remove an LVM logical volume
+          lvol:
+            vg: vgfiles
+            lv: lvfiles
+            state: absent
+            force: yes
+        - name: remove an LVM volume group
+          lvg:
+            vg: vgfiles
+            pvs: /dev/vdb1
+            state: absent
+        - name: remove a single partition that includes all available disk space 
+          parted:
+            name: part1
+            device: /dev/vdb
+            number: 1
+            flags: [ lvm ]
+            state: absent
+            label: gpt  
+      rescue:
+        - name: dev vdb not present
+          debug:
+            msg: device vdb is not present on {{ ansible_facts['hostname'] }}
+      always:
+        - name: exit message
+          debug:
+            msg: "Exiting now"
+           
