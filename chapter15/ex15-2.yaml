@@ -1,0 +1,59 @@
+---
+- name: create storage partitions
+  hosts: all
+  tasks:
+    - name: create a new partition
+      parted:
+        name: swap
+        label: gpt
+        device: /dev/vdb
+        number: 1
+        state: present
+        part_start: 1MiB
+        part_end: 2GiB
+
+    - name: cretae another partition
+      parted:
+        name: forlvm
+        label: gpt
+        device: /dev/vdb
+        number: 2
+        state: present
+        part_start: 2GiB
+        part_end: 4GiB
+        flags: [ lvm ]
+    - name: create volume group
+      lvg:
+        vg: vgdata
+        pesize: "8"
+        pvs: /dev/vdb2
+    - name: create logical volume
+      lvol:
+        vg: vgdata
+        lv: lvdata
+        size: 100%FREE
+        resizefs: yes
+    - name: create a swap file system
+      block:
+        - name: creating filesystem of type swap 
+          filesystem:
+            fstype: swap
+            dev: /dev/vdb1
+        - name: activating swap space
+          command: "swapon /dev/vdb1"
+      when: ansible_facts['swaptotal_mb'] < 2048 
+    - name: create a filesystem for vdb1
+      filesystem:
+        fstype: xfs
+        dev: /dev/vgdata/lvdata
+    - name: mount simple partition
+      mount:
+        src: /dev/vgdata/lvdata
+        path: /data
+        fstype: xfs
+        state: mounted
+    
+        
+       
+
+     

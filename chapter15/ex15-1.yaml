@@ -1,0 +1,24 @@
+---
+- name: define variable acc todisk name
+  hosts: all
+  tasks:
+    - ignore_errors: yes
+      set_fact:
+        disk2name: sdb
+      when: ansible_facts['devices']['sdb']
+    - ignore_errors: yes
+      set_fact:
+        disk2name: nvme0n2
+      when: ansible_facts['devices']['nvme0n2']
+    - ignore_errors: yes
+      set_fact:
+        disk2name: vdb
+      when: ansible_facts['devices']['vdb']
+    - name: getting out if second disk is not found
+      fail:
+        msg: "there is no second disk"
+      when: disk2name is not defined
+
+    - name: showing this only for hosts with second disk 
+      debug:
+        msg: continuing with {{ disk2name }}
