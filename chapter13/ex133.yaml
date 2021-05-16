@@ -1,0 +1,15 @@
+---
+- name: create a user with encrypted password
+  hosts: all
+  vars_prompt:
+    - name: username
+      prompt: Please enter username
+    - name: passw
+      prompt: please enter password
+  tasks: 
+    - name: create a user with passs
+      user:
+        name: "{{ username }}"
+        password: "{{ passw | password_hash('sha256','secretsalt') }}"
+
+

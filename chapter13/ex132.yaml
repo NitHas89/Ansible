@@ -1,0 +1,46 @@
+---
+- name: create user on localhost
+  hosts: localhost
+  tasks:
+    - name: check if username is defined
+      assert:
+        that: 
+          - username is defined
+        fail_msg: "please use format -e username=<value> to specify username while running playbook"
+    - name: create user nitish
+      user: 
+        name: "{{ username }}"
+        groups: wheel
+        append: yes
+        generate_ssh_key: yes
+        ssh_key_comment: "{{ username }}@{{ ansible_facts['fqdn'] }}"
+    - name: create a sudo file
+      copy:
+        content: "{{ username }} ALL=(ALL) NOPASSWD:ALL"
+        dest: /etc/sudoers.d/{{ username }}
+    - name: create ssh_key folder
+      file:
+        path: ssh_key/{{ username }}
+        state: directory
+        recurse: yes
+    - name: copy ssh key to file
+      shell:  "cat /home/{{ username }}/.ssh/id_rsa.pub > ssh_key/{{ username }}/id_rsa.pub"
+  tags: setup_user_localhost
+- name: create users on managed machines
+  hosts: all
+  tasks:
+    - name: create user nitish
+      user: 
+        name: "{{ username }}"
+        groups: wheel
+        append: yes
+    - name: add authorized key
+      authorized_key:
+        key: "{{ lookup('file','ssh_key/' + username + '/id_rsa.pub') }}"
+        user: "{{ username }}"
+        state: present
+    - name: create a sudo file
+      copy:
+        content: "{{ username }} ALL=(ALL) NOPASSWD:ALL"
+        dest: /etc/sudoers.d/{{ username }}
+

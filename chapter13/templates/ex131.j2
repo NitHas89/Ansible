@@ -1,0 +1,3 @@
+{% for user in users | unique %}
+%{{ user.groups }} ALL=(ALL) NOPASSWD:ALL
+{% endfor %}

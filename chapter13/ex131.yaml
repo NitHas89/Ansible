@@ -1,0 +1,20 @@
+---
+- name: create user accounts
+  hosts: server1
+  tasks:
+    - name: create groups
+      group:
+        name: "{{ item.groups }}"
+        state: present
+      loop: "{{ users }}"
+    - name: create users account
+      user:
+        name: "{{ item.username }}"
+        groups: "{{ item.groups }}"
+        append: yes
+      loop: "{{ users }}"
+    - name: create sudoers file using templates
+      template:
+        src: ex131.j2
+        dest: /etc/sudoers.d/custom_group_file
+

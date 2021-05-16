@@ -1,0 +1,61 @@
+---
+- name: ex134 - localhost setup
+  hosts: localhost
+  vars_files:
+    - vars/users
+    - vars/groups
+  tasks:
+    - name: create groups
+      group:
+        name: "{{ item }}"
+        state: present
+      loop: "{{ usergroup }}"
+    - name: create users 
+      user:
+        name: "{{ item.username }}"
+        password: "{{ 'password' | password_hash('sha256','newsalt') }}"
+        groups: "{{ item.groups }}"
+        append: yes
+        generate_ssh_key: yes
+        ssh_key_comment: "{{ item.username }}@{{ ansible_facts['fqdn'] }}"
+      loop: "{{ users }}"
+    - name: create a directory to store users ssh key
+      file:
+        path: ssh_key_ex134/{{ item.username }}
+        state: directory
+        recurse: yes
+      loop: "{{ users }}"
+    - name: copy the ssh keys into directory
+      shell: "cat /home/{{ item.username }}/.ssh/id_rsa.pub > ssh_key_ex134/{{ item.username }}/id_rsa.pub"
+      loop: "{{ users }}"
+- name: managed node setup
+  hosts: all
+  vars_files:
+    - vars/users
+    - vars/groups
+  tasks:
+    - name: create groups
+      group:
+        name: "{{ item }}"
+        state: present
+      loop: "{{ usergroup }}"  
+    - name: create users
+      user:
+        name: "{{ item.username }}"
+        password: "{{ 'password' | password_hash('sha256','newsalt') }}"
+        groups: "{{ item.groups }}"
+        append: yes
+      loop: "{{ users }}"
+    - name: setup authorized keys
+      authorized_key:
+        key: "{{ lookup('file', 'ssh_key_ex134/' + item.username + '/id_rsa.pub' ) }}"
+        user: "{{ item.username }}"
+        state: present
+      loop: "{{ users }}"
+    - name: create sudo file
+      copy:
+        content: '%admins ALL=(ALL) NOPASSWD:ALL'
+        dest: /etc/sudoers.d/admin_ex134
+
+        
+    
