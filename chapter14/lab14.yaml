@@ -1,0 +1,29 @@
+---
+- name: chapter 14 lab
+  hosts: all
+  tasks:
+    - name: Job to restart server at 2 am
+      cron:
+        name: restart_2_am
+        minute: '0'
+        hour: '2'
+        job: "reboot"
+    - name: print message to syslog
+      cron:
+        name: log message on restart
+        special_time: reboot
+        job: "logger CRON initiated reboot just completed"
+    - name: change default target
+      file:
+        src: /usr/lib/systemd/system/multi-user.target
+        dest: /etc/systemd/system/default.target
+        state: link
+    - name: gather service_facts
+      service_facts:
+
+    - name: gather facts
+      setup:
+        gather_subset: 'all'
+    - name: debug service
+      debug:
+        var: ansible_facts

@@ -1,0 +1,10 @@
+---
+- name: create a job to change default target
+  hosts: all
+  tasks:
+    - name: change the soft link for default target
+      file:
+        src:  /usr/lib/systemd/system/multi-user.target
+        dest: /etc/systemd/system/default.target
+        state: link
+

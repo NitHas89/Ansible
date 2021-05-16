@@ -1,0 +1,9 @@
+---
+- name: run logger teatime
+  hosts: all
+  tasks:
+    - name: run periodic job
+      cron:
+        name: logger_run
+        state: absent
+        user: ansible

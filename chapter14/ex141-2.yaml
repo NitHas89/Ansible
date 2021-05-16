@@ -1,0 +1,12 @@
+---
+- name: run logger teatime
+  hosts: all
+  tasks:
+    - name: run periodic job
+      cron:
+        name: logger_run
+        minute: "0"
+        hour: "16"
+        user: ansible
+        job: "logger hurray its tea time"
+

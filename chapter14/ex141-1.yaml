@@ -1,0 +1,12 @@
+---
+- name: run logger at 5 am
+  hosts: all
+  tasks:
+    - name: run a periodic job
+      cron:
+        name: logger_run
+        minute: "0"
+        hour: "5"
+        user: ansible
+        job: "logger its 5 AM ! GOOD Morning"  
+ 
