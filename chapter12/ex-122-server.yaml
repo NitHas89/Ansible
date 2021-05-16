@@ -1,0 +1,43 @@
+---
+- name: setup ftp on local host
+  hosts: localhost
+  tasks:
+    - name: install ftp package
+      yum:
+        name: 
+          - vsftpd
+          - createrepo_c
+        state: present
+    - name: add service to firewall allow list
+      firewalld:
+        service: ftp
+        state: enabled
+        immediate: yes
+        permanent: yes
+    - name: modify configuration to allow anonymous relay
+      lineinfile:
+        regex: '^anonymous_enable=NO'
+        line: 'anonymous_enable=yes'
+        state: present
+        path: /etc/vsftpd/vsftpd.conf
+    - name: start the ftp server
+      service:
+        name: vsftpd
+        state: started
+    - name: create repository directory
+      file:
+        path: /var/ftp/repo
+        state: directory
+    - name: download rpm packages
+      yum:
+        name: nmap
+        download_only: yes
+        download_dir: /var/ftp/repo
+    - name: create repo 
+      command: 'createrepo /var/ftp/repo'
+      notify: restart_ftp
+  handlers:
+    - name: restart_ftp
+      service:
+        name: vsftpd
+        state: restarted

@@ -1,0 +1,24 @@
+---
+- name: setup ftp on local host
+  hosts: localhost
+  tasks:
+    - name: stop the ftp server
+      service:
+        name: vsftpd
+        state: stopped
+    - name: remove service to firewall allow list
+      firewalld:
+        service: ftp
+        state: disabled
+        immediate: yes
+        permanent: yes
+    - name: remove  packages
+      yum:
+        name: 
+          - vsftpd
+          - createrepo_c
+        state: absent
+    - name: delete repository directory
+      file:
+        path: /var/ftp/repo
+        state: absent

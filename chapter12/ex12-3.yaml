@@ -1,0 +1,67 @@
+---
+- name: setup localhost
+  hosts: localhost
+  vars:
+    new_hostname: server2
+    new_hostip: 192.168.122.124
+  tasks:
+    - name: Add the new host information to the inventory 
+      lineinfile:
+        path: inventory
+        line: "{{new_hostname}}"
+        state: present
+    - name: Add the new host information to the /etc/hosts file
+      lineinfile:
+        line: "{{ new_hostip }} {{new_hostname }}"
+        path: /etc/hosts
+        state: present
+    - name: create a directory for ssh
+      file:
+        path: ssh-files/ansible
+        state: directory
+        recurse: yes
+    - name: copy ssh publickey in to a dir
+      shell: "cat /home/ansible/.ssh/id_rsa.pub > ssh-files/ansible/id_rsa.pub"
+
+   
+- name: setup managed hosts
+  hosts: "{{ new_hostname }}"
+  vars:
+    user_ansible: ansible
+  vars_files:
+    - vars/credentials.yaml
+  tasks:
+    - name: Bootstrap a host without python3 installed
+      raw: yum install -y python3
+    - name: setup name of new host
+      hostname:
+        name: server2
+    - name: Set up the user ansible and set password on the new host
+      user:
+        name: "{{ user_ansible }}"
+        state: present
+        groups: wheel
+        append: yes
+        password: "{{ 'password' | password_hash('sha512', 'mysecretsalt') }}" 
+    - name: user ansible can run root commands using sudo
+      copy:
+        content: "{{ user_ansible }} ALL=(ALL) NOPASSWD:ALL"
+        dest: /etc/sudoers.d/{{ user_ansible }}
+    - name: copy the authorized key
+      authorized_key:
+        user: "{{ user_ansible }}"
+        state: present
+        key:  "{{ lookup('file', 'ssh-files/ansible/id_rsa.pub') }}"
+    - name: register the host with the RHEL Subscription Manager
+      redhat_subscription:
+        username: "{{ rh_username }}"
+        password: "{{ rh_passwd }}"
+        state: present
+        auto_attach: true
+    - name: Add red hat subscription manager repos
+      rhsm_repository:
+        name: 
+          - rh-gluster-3-client-for-rhel-8-x86_64-rpms
+          - rhel-8-for-x86_64-appstream-debug-rpms
+        state: enabled  
+

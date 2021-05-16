@@ -1,0 +1,29 @@
+---
+- name: setup repositories
+  hosts: all
+  vars:
+    my_package: nmap
+  tasks:
+    - name: setup local ftp repositories
+      yum_repository:
+        name: controlrepo
+        description: control node nmap repo
+        file: controlrepo
+        baseurl: ftp://control/repo/
+        gpgcheck: no
+    - name: ensure control node is resolvable
+      lineinfile:
+        line: '192.168.122.122    control'
+        path: /etc/hosts
+
+    - name: install {{ my_package }} from repos
+      yum:
+        name: "{{ my_package }}"
+        state: present
+    - name: gather facts about packages
+      package_facts:
+        manager: auto
+    - name: display managed facts
+      debug:
+        var: ansible_facts['packages'][my_package]
+     

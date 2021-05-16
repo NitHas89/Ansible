@@ -1,0 +1,17 @@
+---
+- name: Manage Software package exercise 12-1
+  hosts: server2
+  vars:
+    my_package: virt-manager
+  tasks:
+    - name: install package
+      yum:
+        name: "{{ my_package }}"
+        state: present
+    - name: gather facts about package
+      package_facts:
+        manager: auto
+    - name: show facts about package
+      debug:
+        var: ansible_facts['packages'][my_package]
+      when: ansible_facts['packages'][my_package] is defined

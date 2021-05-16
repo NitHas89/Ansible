@@ -1,0 +1,21 @@
+---
+- name: setup repositories
+  hosts: all
+  vars:
+    my_package: nmap
+  tasks:
+    - name: setup local ftp repositories
+      yum_repository:
+        name: controlrepo
+        state: absent
+    - name: ensure control node is resolvable
+      lineinfile:
+        line: '192.168.122.122    control'
+        path: /etc/hosts
+        state: absent
+
+    - name: install {{ my_package }} from repos
+      yum:
+        name: "{{ my_package }}"
+        state: absent
+     
