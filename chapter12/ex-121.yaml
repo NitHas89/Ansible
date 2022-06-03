@@ -1,5 +1,6 @@
 ---
 - name: Manage Software package exercise 12-1
+  host: all
   vars:
     my_package: virt-manager
   tasks:
